@@ -43,7 +43,34 @@ namespace Todo.Controllers
             if (item == null)
                 return NotFound();
             return Ok(item);
+        }
 
+        [HttpPut("{id}")]
+        public async Task<IActionResult> Update(int id, ItemData item)
+        {
+            if (id != item.Id)
+                return BadRequest();
+            var existItem = await _context.Items.FirstOrDefaultAsync(x => x.Id == id);
+            if (existItem == null)
+                return NotFound();
+            existItem.Title = item.Title;
+            existItem.Description = item.Description;
+            existItem.Done = item.Done;
+            //Внедрить изменения на уровне базы данных 
+            await _context.SaveChangesAsync();
+
+            return NotFound();
+        }
+
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> Delete(int id)
+        {
+            var existItem = await _context.Items.FirstOrDefaultAsync(x => x.Id == id);
+            if (existItem == null)
+                return NotFound();
+            _context.Items.Remove(existItem);
+            await _context.SaveChangesAsync();
+            return Ok(existItem);
         }
     }
 }
